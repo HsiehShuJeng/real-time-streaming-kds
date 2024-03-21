@@ -22,12 +22,12 @@ export class Buckets extends Construct {
 
 
     this.taxiTripDataSet = new s3.Bucket(this, 'TaxiTripDataSet', {
-        bucketName: `nyctaxitrips-${cdk.Aws.ACCOUNT_ID}-${cdk.Aws.REGION}-${randomGUID}`,
-        removalPolicy: cdk.RemovalPolicy.RETAIN,
-      });
+      bucketName: `nyctaxitrips-${cdk.Aws.ACCOUNT_ID}-${cdk.Aws.REGION}-${randomGUID}`,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
       
-      this.curatedDataSet = new s3.Bucket(this, 'CuratedDataSet', {
-        bucketName: `curateddata-${cdk.Aws.ACCOUNT_ID}-${cdk.Aws.REGION}-${randomGUID}`,
-        removalPolicy: cdk.RemovalPolicy.RETAIN,
-      });
+    this.curatedDataSet = new s3.Bucket(this, 'CuratedDataSet', {
+      bucketName: `curateddata-${cdk.Aws.ACCOUNT_ID}-${cdk.Aws.REGION}-${randomGUID}`,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
 }}
