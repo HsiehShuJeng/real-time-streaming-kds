@@ -147,6 +147,102 @@ export class KinesisAnalyticsRole extends Construct {
         new cdk.CfnOutput(this, 'KinesisAnalyticsRoleArn', {value: this.entity.roleArn, description: 'The ARN of the KDA role.'})
 }}
 
+/**
+ * KdsConsumerRole
+ *
+ * This construct creates an IAM role for a Kinesis Data Stream consumer, specifically designed for use with AWS Lambda. 
+ * The role includes both managed and inline policies tailored for accessing and processing streaming data.
+ *
+ * Example Usage:
+ * ```
+ * const kdsConsumerRole = new KdsConsumerRole(this, 'MyKdsConsumerRole');
+ * ```
+ *
+ * Properties:
+ * - `entity`: iam.Role - The IAM role entity created by this construct.
+ *
+ * Constructs an instance of `KdsConsumerRole`.
+ * 
+ * @param scope - The parent creating construct (usually a `cdk.Stack`).
+ * @param id - The unique identifier for this construct within its parent scope.
+ *
+ * The IAM role created includes the following permissions:
+ * - Managed Policies:
+ *   - AWSLambdaKinesisExecutionRole: Provides permissions for the Lambda function to consume records from Kinesis Data Streams.
+ *   - AWSLambdaDynamoDBExecutionRole: Provides permissions for the Lambda function to access DynamoDB resources.
+ * - Inline Policies:
+ *   - LambdaFunctionPolicy: A set of policies that allows actions such as creating log groups and streams in CloudWatch, and read/write operations on a specified DynamoDB table.
+ *
+ * Outputs:
+ * - `KdsConsumerRoleArn`: The Amazon Resource Name (ARN) of the created KDS consumer role.
+ */
+export class KdsConsumerRole extends Construct {
+    public readonly entity: iam.Role;
+    constructor(scope: Construct, id: string) {
+        super(scope, id);
+        this.entity = new iam.Role(this, 'KdsConsumerRole', {
+            roleName: `KinesisLambdaConsumerRole-${cdk.Aws.STACK_NAME}`,
+            assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+            path: '/',
+            managedPolicies: [
+                iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaKinesisExecutionRole'),
+                iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaDynamoDBExecutionRole'),
+            ],
+            inlinePolicies: {
+                ['LambdaFunctionPolicy']: new iam.PolicyDocument({
+                    assignSids: true,
+                    minimize: true,
+                    statements: [
+                        new iam.PolicyStatement({
+                            effect: iam.Effect.ALLOW,
+                            actions: [
+                                'logs:CreateLogGroup'
+                            ],
+                            resources: [
+                                `arn:aws:logs:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:*`
+                            ]
+                        }),
+                        new iam.PolicyStatement({
+                            effect: iam.Effect.ALLOW,
+                            actions: [
+                                'logs:CreateLogStream',
+                                'logs:PutLogEvents'
+                            ],
+                            resources: [
+                                `arn:aws:logs:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:log-group:/aws/lambda/NYCTaxiTrips-DataTransformation-*:*`
+                            ]
+                        }),
+                        new iam.PolicyStatement({
+                            effect: iam.Effect.ALLOW,
+                            actions: [
+                                'dynamodb:PutItem',
+                                'dynamodb:UpdateItem',
+                                'dynamodb:UpdateTable'
+                            ],
+                            resources: [
+                                `arn:aws:dynamodb:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:table/kinesisAggs`
+                            ]
+                        }),
+                        new iam.PolicyStatement({
+                            effect: iam.Effect.ALLOW,
+                            actions: [
+                                'dynamodb:ListContributorInsights',
+                                'dynamodb:ListGlobalTables',
+                                'dynamodb:ListTables',
+                                'dynamodb:ListBackups',
+                                'dynamodb:ListExports'
+                            ],
+                            resources: [
+                                '*'
+                            ]
+                        })
+                    ]})
+                }
+        })
+        new cdk.CfnOutput(this, 'KdsConsumerRoleArn', {value: this.entity.roleArn, description: 'The ARN of the KDS consumer role.'})
+    }
+}
+
 
 export class KDALambdaRole extends Construct {
     public readonly entity: iam.Role;

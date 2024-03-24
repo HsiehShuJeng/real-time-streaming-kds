@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { Buckets } from '../lib/buckets';
-import { KDALambdaRole, KinesisAnalyticsRole } from '../lib/iam-entities';
+import { KDALambdaRole, KdsConsumerRole, KinesisAnalyticsRole } from '../lib/iam-entities';
 describe("Tests the creation of IAM roles", () => {
     const app = new cdk.App();
         // WHEN
@@ -11,6 +11,7 @@ describe("Tests the creation of IAM roles", () => {
         curatedDataSetBucket: requiredBuckets.curatedDataSet,
         taxiTripDataSetBucket: requiredBuckets.taxiTripDataSet
     });
+    new KdsConsumerRole(stack, 'KdsConsumerRole')
     new KDALambdaRole(stack, 'KDALambda')
     const template = Template.fromStack(stack);
     test('Checks the number of IAM roles', () => {
@@ -21,7 +22,7 @@ describe("Tests the creation of IAM roles", () => {
                 iamRoleNumber++;
             }
         });
-        expect(iamRoleNumber).toBe(2);
+        expect(iamRoleNumber).toBe(3);
     })
     test('Checks the KDA role', () => {
         // THEN
@@ -261,8 +262,6 @@ describe("Tests the creation of IAM roles", () => {
         }))
     });
     test('Checks the KDA Lambda role', () =>{
-        const iamRoles = template.findResources('AWS::IAM::Role')
-        // THEN
         template.findResources('AWS::IAM::Role', Match.objectEquals({
             "AssumeRolePolicyDocument": {
                 "Statement": [
@@ -372,6 +371,152 @@ describe("Tests the creation of IAM roles", () => {
                     "",
                     [
                         "KDA-Lambda-",
+                        {
+                            "Ref": "AWS::StackName"
+                        }
+                    ]
+                ]
+            }
+        }))
+    })
+    test('Checks the KDS consumer role', () =>{
+        template.hasResourceProperties('AWS::IAM::Role', Match.objectEquals({
+            "AssumeRolePolicyDocument": {
+                "Statement": [
+                    {
+                        "Action": "sts:AssumeRole",
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": "lambda.amazonaws.com"
+                        }
+                    }
+                ],
+                "Version": "2012-10-17"
+            },
+            "ManagedPolicyArns": [
+                {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":iam::aws:policy/service-role/AWSLambdaKinesisExecutionRole"
+                        ]
+                    ]
+                },
+                {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":iam::aws:policy/service-role/AWSLambdaDynamoDBExecutionRole"
+                        ]
+                    ]
+                }
+            ],
+            "Path": "/",
+            "Policies": [
+                {
+                    "PolicyDocument": {
+                        "Statement": [
+                            {
+                                "Action": "logs:CreateLogGroup",
+                                "Effect": "Allow",
+                                "Resource": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:logs:",
+                                            {
+                                                "Ref": "AWS::Region"
+                                            },
+                                            ":",
+                                            {
+                                                "Ref": "AWS::AccountId"
+                                            },
+                                            ":*"
+                                        ]
+                                    ]
+                                },
+                                "Sid": "0"
+                            },
+                            {
+                                "Action": [
+                                    "logs:CreateLogStream",
+                                    "logs:PutLogEvents"
+                                ],
+                                "Effect": "Allow",
+                                "Resource": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:logs:",
+                                            {
+                                                "Ref": "AWS::Region"
+                                            },
+                                            ":",
+                                            {
+                                                "Ref": "AWS::AccountId"
+                                            },
+                                            ":log-group:/aws/lambda/NYCTaxiTrips-DataTransformation-*:*"
+                                        ]
+                                    ]
+                                },
+                                "Sid": "1"
+                            },
+                            {
+                                "Action": [
+                                    "dynamodb:PutItem",
+                                    "dynamodb:UpdateItem",
+                                    "dynamodb:UpdateTable"
+                                ],
+                                "Effect": "Allow",
+                                "Resource": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:dynamodb:",
+                                            {
+                                                "Ref": "AWS::Region"
+                                            },
+                                            ":",
+                                            {
+                                                "Ref": "AWS::AccountId"
+                                            },
+                                            ":table/kinesisAggs"
+                                        ]
+                                    ]
+                                },
+                                "Sid": "2"
+                            },
+                            {
+                                "Action": [
+                                    "dynamodb:ListBackups",
+                                    "dynamodb:ListContributorInsights",
+                                    "dynamodb:ListExports",
+                                    "dynamodb:ListGlobalTables",
+                                    "dynamodb:ListTables"
+                                ],
+                                "Effect": "Allow",
+                                "Resource": "*",
+                                "Sid": "3"
+                            }
+                        ],
+                        "Version": "2012-10-17"
+                    },
+                    "PolicyName": "LambdaFunctionPolicy"
+                }
+            ],
+            "RoleName": {
+                "Fn::Join": [
+                    "",
+                    [
+                        "KinesisLambdaConsumerRole-",
                         {
                             "Ref": "AWS::StackName"
                         }
