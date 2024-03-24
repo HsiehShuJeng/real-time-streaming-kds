@@ -1,8 +1,9 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { Buckets } from './buckets';
-import { KinesisAnalyticsRole } from './iam-entities';
+import { KdsConsumerRole, KinesisAnalyticsRole } from './iam-entities';
 import { KdaStudio } from './kda-studio';
+import { DataTransformer } from './lambda-functions';
 import { GlueDatabase } from './metadata';
 
 export class RealTimeStreamingKdsStack extends cdk.Stack {
@@ -16,6 +17,10 @@ export class RealTimeStreamingKdsStack extends cdk.Stack {
       taxiTripDataSetBucket: requiredBuckets.taxiTripDataSet,
       curatedDataSetBucket: requiredBuckets.curatedDataSet,
       eeAssetsBucketName: eeAssetsBucketName
+    })
+    const kdsConsumerRole = new KdsConsumerRole(this, 'KdsConsumer')
+    new DataTransformer(this, 'DataTransformer', {
+      baseRole: kdsConsumerRole.entity
     })
     new KdaStudio(this, 'KdaStudio', {
       glueDatabase: glueDatabase.entity,
