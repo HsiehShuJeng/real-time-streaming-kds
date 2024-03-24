@@ -25,6 +25,11 @@
   resolved "https://registry.yarnpkg.com/@aws-cdk/asset-node-proxy-agent-v6/-/asset-node-proxy-agent-v6-2.0.1.tgz#6dc9b7cdb22ff622a7176141197962360c33e9ac"
   integrity sha512-DDt4SLdLOwWCjGtltH4VCST7hpOI5DzieuhGZsBpZ+AgJdSI2GCjklCXm0GCTwJG/SolkL5dtQXyUKgg9luBDg==
 
+"@aws-cdk/aws-glue-alpha@^2.133.0-alpha.0":
+  version "2.133.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/aws-glue-alpha/-/aws-glue-alpha-2.133.0-alpha.0.tgz#bf7755e129385af9c00be848d76eb85ec1914221"
+  integrity sha512-bs0L3oBWhX97Avpyvq6h7/MxKOA76afGPaH/1Sfd5vJXEh8nvMICKERShp+bRSkwu0yYBc/HPiEQyo8vWXjP5w==
+
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.12.13", "@babel/code-frame@^7.23.5", "@babel/code-frame@^7.24.1", "@babel/code-frame@^7.24.2":
   version "7.24.2"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.24.2.tgz#718b4b19841809a58b29b68cde80bc5e1aa6d9ae"
