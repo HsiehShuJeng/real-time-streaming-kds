@@ -143,5 +143,56 @@ export class KinesisAnalyticsRole extends Construct {
                     ]
                 })
             }
-      })
+        })
+        new cdk.CfnOutput(this, 'KinesisAnalyticsRoleArn', {value: this.entity.roleArn, description: 'The ARN of the KDA role.'})
 }}
+
+
+export class KDALambdaRole extends Construct {
+    public readonly entity: iam.Role;
+    constructor(scope: Construct, id: string) {
+        super(scope, id);
+        this.entity = new iam.Role(this, 'KDALambdaRole', {
+            roleName: `KDA-Lambda-${cdk.Aws.STACK_NAME}`,
+            assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+            path: '/',
+            managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole')],
+            inlinePolicies: {
+                ['LambdaFunctionPolicy']: new iam.PolicyDocument({
+                    assignSids: true,
+                    minimize: true,
+                    statements: [
+                        new iam.PolicyStatement({
+                            effect: iam.Effect.ALLOW,
+                            actions: [
+                                'logs:CreateLogGroup'
+                            ],
+                            resources: [
+                                `arn:aws:logs:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:*`
+                            ]
+                        }),
+                        new iam.PolicyStatement({
+                            effect: iam.Effect.ALLOW,
+                            actions: [
+                                'logs:CreateLogStream',
+                                'logs:PutLogEvents'
+                            ],
+                            resources: [
+                                `arn:aws:logs:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:log-group:/aws/lambda/StartKDA-*:*`
+                            ]
+                        }),
+                        new iam.PolicyStatement({
+                            effect: iam.Effect.ALLOW,
+                            actions: [
+                                'kinesisanalytics:StartApplication'
+                            ],
+                            resources: [
+                                `arn:aws:kinesisanalytics:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:application/KDA-studio-*`
+                            ]
+                        })
+                    ]
+                })
+            } 
+        })
+    }
+}
