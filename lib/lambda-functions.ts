@@ -1,6 +1,8 @@
 import * as cdk from 'aws-cdk-lib';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as logs from 'aws-cdk-lib/aws-logs';
+import * as cr from 'aws-cdk-lib/custom-resources';
 import { Construct } from "constructs";
 import * as path from 'path';
 
@@ -50,5 +52,40 @@ export class DataTransformer extends Construct {
             role: props.baseRole
         });
         new cdk.CfnOutput(this, 'DataTransformerArn', {value: this.entity.functionArn, description: 'The ARN of the data transformer as a Lambda function.'})
+    }
+}
+
+interface KdsStartLambdaFunctionProps {
+    baseRole: iam.Role;
+    applicationName: string;
+}
+
+export class KdsStartLambdaFunction extends Construct {
+    public readonly entity: lambda.Function;
+    constructor(scope: Construct, id: string, props: KdsStartLambdaFunctionProps) {
+        super(scope, id);
+        const functionScript = 'import json\r\nimport boto3\r\nimport cfnresponse\r\n\r\nclient = boto3.client("kinesisanalyticsv2")\r\n\r\n\r\ndef lambda_handler(event, context):\r\n    print(event)\r\n    response_data = {}\r\n    if event["RequestType"] == "Delete":\r\n        cfnresponse.send(\r\n            event,\r\n            context,\r\n            cfnresponse.SUCCESS,\r\n            response_data,\r\n            "CustomResourcePhysicalID",\r\n        )\r\n        return\r\n    application_name = event["ResourceProperties"]["ApplicationName"]\r\n    try:\r\n        response = client.start_application(ApplicationName=application_name)\r\n        print(json.dumps(response, indent=4))\r\n        response_value = "Started the Application"\r\n        response_data["Data"] = response_value\r\n    except:\r\n        response_value = (\r\n            "Failed Starting the Application, Please start the application manually"\r\n        )\r\n        response_data["Data"] = response_value\r\n    cfnresponse.send(\r\n        event, context, cfnresponse.SUCCESS, response_data, "CustomResourcePhysicalID"\r\n    )\r\n'
+        this.entity = new lambda.Function(this, 'Lambda', {
+            functionName: `StartKDA-${cdk.Aws.STACK_NAME}`,
+            runtime: lambda.Runtime.PYTHON_3_12,
+            handler: 'kds-start.lambda_handler',
+            code: lambda.Code.fromInline(functionScript),
+            timeout: cdk.Duration.seconds(10),
+            role: props.baseRole.withoutPolicyUpdates()
+        });
+        const provider = new cr.Provider(this, 'Provider', {
+            onEventHandler: this.entity,
+            logGroup: new logs.LogGroup(this, 'LogGroup', {
+                retention: logs.RetentionDays.ONE_WEEK
+            }),
+            role: props.baseRole.withoutPolicyUpdates()
+        })
+        new cdk.CustomResource(this, 'StartKds', {
+            serviceToken: provider.serviceToken,
+            resourceType: 'Custom::StartKDA',
+            properties: {
+                ApplicationName: props.applicationName
+            }
+        })
     }
 }

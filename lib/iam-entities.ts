@@ -243,16 +243,18 @@ export class KdsConsumerRole extends Construct {
     }
 }
 
+interface StartKdaLambdaRoleProps {
+    functionName: string;
+}
 
-export class KDALambdaRole extends Construct {
+export class StartKdaLambdaRole extends Construct {
     public readonly entity: iam.Role;
-    constructor(scope: Construct, id: string) {
+    constructor(scope: Construct, id: string, props: StartKdaLambdaRoleProps) {
         super(scope, id);
-        this.entity = new iam.Role(this, 'KDALambdaRole', {
+        this.entity = new iam.Role(this, 'LambdaRole', {
             roleName: `KDA-Lambda-${cdk.Aws.STACK_NAME}`,
             assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
             path: '/',
-            managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole')],
             inlinePolicies: {
                 ['LambdaFunctionPolicy']: new iam.PolicyDocument({
                     assignSids: true,
@@ -274,7 +276,7 @@ export class KDALambdaRole extends Construct {
                                 'logs:PutLogEvents'
                             ],
                             resources: [
-                                `arn:aws:logs:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:log-group:/aws/lambda/StartKDA-*:*`
+                                `arn:aws:logs:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:log-group:/aws/lambda/StartKDA-*`
                             ]
                         }),
                         new iam.PolicyStatement({
@@ -285,10 +287,20 @@ export class KDALambdaRole extends Construct {
                             resources: [
                                 `arn:aws:kinesisanalytics:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:application/KDA-studio-*`
                             ]
+                        }),
+                        new iam.PolicyStatement({
+                            effect: iam.Effect.ALLOW,
+                            actions: [
+                                'lambda:InvokeFunction'
+                            ],
+                            resources: [
+                                `arn:${cdk.Aws.PARTITION}:lambda:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:function:${props.functionName}`
+                            ]
                         })
                     ]
                 })
             } 
-        })
+        });
+        this.entity.withoutPolicyUpdates();
     }
 }

@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { Buckets } from '../lib/buckets';
-import { KDALambdaRole, KdsConsumerRole, KinesisAnalyticsRole } from '../lib/iam-entities';
+import { KdsConsumerRole, KinesisAnalyticsRole, StartKdaLambdaRole } from '../lib/iam-entities';
 describe("Tests the creation of IAM roles", () => {
     const app = new cdk.App();
         // WHEN
@@ -12,7 +12,9 @@ describe("Tests the creation of IAM roles", () => {
         taxiTripDataSetBucket: requiredBuckets.taxiTripDataSet
     });
     new KdsConsumerRole(stack, 'KdsConsumerRole')
-    new KDALambdaRole(stack, 'KDALambda')
+    new StartKdaLambdaRole(stack, 'KDALambda', {
+        functionName: `StartKDA-${cdk.Aws.STACK_NAME}`
+    })
     const template = Template.fromStack(stack);
     test('Checks the number of IAM roles', () => {
         const iamResources = template.findResources('AWS::IAM::Role');
@@ -261,123 +263,137 @@ describe("Tests the creation of IAM roles", () => {
             }
         }))
     });
-    test('Checks the KDA Lambda role', () =>{
+    test('Checks the KDA starting Lambda role', () =>{
         template.findResources('AWS::IAM::Role', Match.objectEquals({
             "AssumeRolePolicyDocument": {
-                "Statement": [
-                    {
-                        "Action": "sts:AssumeRole",
-                        "Effect": "Allow",
-                        "Principal": {
-                            "Service": "lambda.amazonaws.com"
-                        }
-                    }
-                ],
-                "Version": "2012-10-17"
-            },
-            "ManagedPolicyArns": [
+              "Statement": [
                 {
-                    "Fn::Join": [
-                        "",
-                        [
-                            "arn:",
-                            {
-                                "Ref": "AWS::Partition"
-                            },
-                            ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-                        ]
-                    ]
+                  "Action": "sts:AssumeRole",
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": "lambda.amazonaws.com"
+                  }
                 }
-            ],
+              ],
+              "Version": "2012-10-17"
+            },
             "Path": "/",
             "Policies": [
-                {
-                    "PolicyDocument": {
-                        "Statement": [
+              {
+                "PolicyDocument": {
+                  "Statement": [
+                    {
+                      "Action": "logs:CreateLogGroup",
+                      "Effect": "Allow",
+                      "Resource": {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:aws:logs:",
                             {
-                                "Action": "logs:CreateLogGroup",
-                                "Effect": "Allow",
-                                "Resource": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "arn:aws:logs:",
-                                            {
-                                                "Ref": "AWS::Region"
-                                            },
-                                            ":",
-                                            {
-                                                "Ref": "AWS::AccountId"
-                                            },
-                                            ":*"
-                                        ]
-                                    ]
-                                },
-                                "Sid": "0"
+                              "Ref": "AWS::Region"
                             },
+                            ":",
                             {
-                                "Action": [
-                                    "logs:CreateLogStream",
-                                    "logs:PutLogEvents"
-                                ],
-                                "Effect": "Allow",
-                                "Resource": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "arn:aws:logs:",
-                                            {
-                                                "Ref": "AWS::Region"
-                                            },
-                                            ":",
-                                            {
-                                                "Ref": "AWS::AccountId"
-                                            },
-                                            ":log-group:/aws/lambda/StartKDA-*:*"
-                                        ]
-                                    ]
-                                },
-                                "Sid": "1"
+                              "Ref": "AWS::AccountId"
                             },
-                            {
-                                "Action": "kinesisanalytics:StartApplication",
-                                "Effect": "Allow",
-                                "Resource": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "arn:aws:kinesisanalytics:",
-                                            {
-                                                "Ref": "AWS::Region"
-                                            },
-                                            ":",
-                                            {
-                                                "Ref": "AWS::AccountId"
-                                            },
-                                            ":application/KDA-studio-*"
-                                        ]
-                                    ]
-                                },
-                                "Sid": "2"
-                            }
-                        ],
-                        "Version": "2012-10-17"
+                            ":*"
+                          ]
+                        ]
+                      },
+                      "Sid": "0"
                     },
-                    "PolicyName": "LambdaFunctionPolicy"
-                }
+                    {
+                      "Action": [
+                        "logs:CreateLogStream",
+                        "logs:PutLogEvents"
+                      ],
+                      "Effect": "Allow",
+                      "Resource": {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:aws:logs:",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId"
+                            },
+                            ":log-group:/aws/lambda/StartKDA-*"
+                          ]
+                        ]
+                      },
+                      "Sid": "1"
+                    },
+                    {
+                      "Action": "kinesisanalytics:StartApplication",
+                      "Effect": "Allow",
+                      "Resource": {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:aws:kinesisanalytics:",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId"
+                            },
+                            ":application/KDA-studio-*"
+                          ]
+                        ]
+                      },
+                      "Sid": "2"
+                    },
+                    {
+                      "Action": "lambda:InvokeFunction",
+                      "Effect": "Allow",
+                      "Resource": {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":lambda:",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId"
+                            },
+                            ":function:StartKDA-",
+                            {
+                              "Ref": "AWS::StackName"
+                            }
+                          ]
+                        ]
+                      },
+                      "Sid": "3"
+                    }
+                  ],
+                  "Version": "2012-10-17"
+                },
+                "PolicyName": "LambdaFunctionPolicy"
+              }
             ],
             "RoleName": {
-                "Fn::Join": [
-                    "",
-                    [
-                        "KDA-Lambda-",
-                        {
-                            "Ref": "AWS::StackName"
-                        }
-                    ]
+              "Fn::Join": [
+                "",
+                [
+                  "KDA-Lambda-",
+                  {
+                    "Ref": "AWS::StackName"
+                  }
                 ]
+              ]
             }
-        }))
+          }))
     })
     test('Checks the KDS consumer role', () =>{
         template.hasResourceProperties('AWS::IAM::Role', Match.objectEquals({
