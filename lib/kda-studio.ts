@@ -9,6 +9,7 @@ interface KdaStudioProps {
     readonly glueDatabase: glue.Database;
     readonly eeAssetsBucketName: string;
     readonly eeAssetsBUcketPrefix?: string;
+    readonly applicationName?: string;
 }
 
 export class KdaStudio extends Construct {
@@ -17,8 +18,9 @@ export class KdaStudio extends Construct {
         super(scope, id);
         const eeAssetsBucketName = props.eeAssetsBucketName ?? 'ee-assets-prod-us-east-1';
         const eeAssetsBUcketPrefix = props.eeAssetsBUcketPrefix ?? 'modules/599e7c685a254c2b892cdbf58a7b3b4f/v1/';
+        const applicationName = props.applicationName ?? `KDA-studio-1-${cdk.Aws.STACK_NAME}`
         this.entity = new kinesisanalytics.CfnApplication(this, 'Application', {
-            applicationName: `KDA-studio-1-${cdk.Aws.STACK_NAME}`,
+            applicationName: applicationName,
             applicationDescription: 'Kinesis Flink Sql Demo',
             runtimeEnvironment: 'ZEPPELIN-FLINK-2_0',
             applicationMode: 'INTERACTIVE',

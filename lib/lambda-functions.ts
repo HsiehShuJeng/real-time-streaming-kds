@@ -68,7 +68,7 @@ export class KdsStartLambdaFunction extends Construct {
         this.entity = new lambda.Function(this, 'Lambda', {
             functionName: `StartKDA-${cdk.Aws.STACK_NAME}`,
             runtime: lambda.Runtime.PYTHON_3_12,
-            handler: 'kds-start.lambda_handler',
+            handler: 'index.lambda_handler',
             code: lambda.Code.fromInline(functionScript),
             timeout: cdk.Duration.seconds(10),
             role: props.baseRole.withoutPolicyUpdates()

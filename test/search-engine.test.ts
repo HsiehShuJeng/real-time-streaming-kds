@@ -20,59 +20,59 @@ describe("Tests the creation of Open Search instances", () => {
     test('Checks the instance of Open Search', () => {
         template.hasResourceProperties(resuorceType, Match.objectEquals({
             "AdvancedSecurityOptions": {
-                "Enabled": true,
-                "InternalUserDatabaseEnabled": true,
-                "MasterUserOptions": {
-                    "MasterUserName": {
-                        "Fn::Join": [
-                            "",
-                            [
-                                "{{resolve:secretsmanager:",
-                                {
-                                    "Ref": "OpenSearchPasswordF9095365"
-                                },
-                                ":SecretString:username::}}"
-                            ]
-                        ]
-                    },
-                    "MasterUserPassword": {
-                        "Fn::Join": [
-                            "",
-                            [
-                                "{{resolve:secretsmanager:",
-                                {
-                                    "Ref": "OpenSearchPasswordF9095365"
-                                },
-                                ":SecretString:password::}}"
-                            ]
-                        ]
-                    }
+              "Enabled": true,
+              "InternalUserDatabaseEnabled": true,
+              "MasterUserOptions": {
+                "MasterUserName": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "{{resolve:secretsmanager:",
+                      {
+                        "Ref": "OpenSearchPasswordF9095365"
+                      },
+                      ":SecretString:username::}}"
+                    ]
+                  ]
+                },
+                "MasterUserPassword": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "{{resolve:secretsmanager:",
+                      {
+                        "Ref": "OpenSearchPasswordF9095365"
+                      },
+                      ":SecretString:password::}}"
+                    ]
+                  ]
                 }
+              }
             },
             "ClusterConfig": {
-                "DedicatedMasterEnabled": false,
-                "InstanceCount": 1,
-                "InstanceType": "t3.medium.search",
-                "ZoneAwarenessEnabled": false
+              "DedicatedMasterEnabled": false,
+              "InstanceCount": 1,
+              "InstanceType": "t3.medium.search",
+              "ZoneAwarenessEnabled": false
             },
             "DomainEndpointOptions": {
-                "EnforceHTTPS": true,
-                "TLSSecurityPolicy": "Policy-Min-TLS-1-0-2019-07"
+              "EnforceHTTPS": true,
+              "TLSSecurityPolicy": "Policy-Min-TLS-1-0-2019-07"
             },
             "DomainName": "os-domain",
             "EBSOptions": {
-                "EBSEnabled": true,
-                "VolumeSize": 10,
-                "VolumeType": "gp2"
+              "EBSEnabled": true,
+              "VolumeSize": 10,
+              "VolumeType": "gp2"
             },
             "EncryptionAtRestOptions": {
-                "Enabled": true
+              "Enabled": true
             },
             "EngineVersion": "OpenSearch_1.2",
             "LogPublishingOptions": {},
             "NodeToNodeEncryptionOptions": {
-                "Enabled": true
+              "Enabled": true
             }
-        }))
+          }))
     });
 })

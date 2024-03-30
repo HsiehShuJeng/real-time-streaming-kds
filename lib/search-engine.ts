@@ -29,7 +29,11 @@ export class OpenSearch extends Construct {
             version: opensearch.EngineVersion.OPENSEARCH_1_2,
             capacity: {
                 dataNodes: 1,
-                dataNodeInstanceType: 't3.medium.search'
+                dataNodeInstanceType: 't3.medium.search',
+                multiAzWithStandbyEnabled: false
+            },
+            zoneAwareness: {
+                enabled: false
             },
             accessPolicies: [
                 new iam.PolicyStatement({
@@ -52,6 +56,7 @@ export class OpenSearch extends Construct {
                 volumeSize: 10,
                 volumeType: ec2.EbsDeviceVolumeType.GP2
             },
+            removalPolicy: cdk.RemovalPolicy.DESTROY
         });
         new cdk.CfnOutput(this, 'PasswordSecret', {
             value: pwdSecret.secretArn,
