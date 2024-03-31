@@ -21,3 +21,23 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
 TestStackStack could not be generated because Resources.Mamamiya.Properties.BucketName[1].RandomGUID: untagged and internally tagged enums do not support enum input at line 68 column 27
 ```
+
+# TBD
+## Cloud 9
+![](images/Cloud%209%20Launch.png)
+```bash
+# Step 1
+sudo yum install maven -y
+# Point to Java 11
+sudo update-alternatives --config java
+sudo update-alternatives --config javac
+```
+![](images/Point%20to%20Java%2011.png)
+
+## Using the Amazon SDK with Kinesis
+Goal
+1. Create a Kinesis Data Stream (if one does not already exist).
+2. Learn about the concepts of writing to a Kinesis Data Stream using the Kinesis Data Streams API.
+3. Write Data to a Kinesis Data Stream.
+Optimize our code for low latency writes to the Kinesis Data Stream.
+4. Ensure data is published in order per shard
