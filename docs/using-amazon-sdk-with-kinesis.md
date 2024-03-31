@@ -19,8 +19,8 @@ Optimize our code for low latency writes to the Kinesis Data Stream.
     import random
     from datetime import timedelta
 
-    kdsname='input-stream'
-    region='us-east-1'
+    kdsname='input_stream'
+    region='ap-southeast-1'
     i=0
     clientkinesis = boto3.client('kinesis',region_name=region)
 
@@ -102,7 +102,11 @@ Optimize our code for low latency writes to the Kinesis Data Stream.
     ```bash
     pip install boto3
     ```
-2. 
+2. Once you finish uploading the python script on your Cloud9 environment, run the program by entering the following command in Cloud9 terminal. The script will start ingesting records to your Kinesis Data Stream and print request ID and successful HTTP response code (200).
+    ```bash
+    python lab1.py
+    ```
+    ![](../images/[Lab1]%20Ingestion%20Screenshot.png)
 
 # Notes
 ## Amazon Kinesis Data Streams
