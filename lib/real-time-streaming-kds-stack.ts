@@ -3,7 +3,7 @@ import { Construct } from 'constructs';
 import { Buckets } from './buckets';
 import { Cloud9Instance } from './cloud9';
 import { KdsConsumerRole, KinesisAnalyticsRole, StartKdaLambdaRole } from './iam-entities';
-import { KdaStudio } from './kda-studio';
+import { BaseKinesisDataStream, KdaStudio } from './kda-studio';
 import { DataTransformer, KdsStartLambdaFunction } from './lambda-functions';
 import { GlueDatabase } from './metadata';
 import { OpenSearch } from './search-engine';
@@ -25,6 +25,7 @@ export class RealTimeStreamingKdsStack extends cdk.Stack {
     new DataTransformer(this, 'DataTransformer', {
       baseRole: kdsConsumerRole.entity
     });
+    new BaseKinesisDataStream(this, 'Beginner');
     const kdsStudio = new KdaStudio(this, 'KdaStudio', {
       glueDatabase: glueDatabase.entity,
       serviceRole: kineseAnalyticsRole.entity,

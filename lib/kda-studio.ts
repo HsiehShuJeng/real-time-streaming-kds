@@ -1,6 +1,7 @@
 import * as glue from '@aws-cdk/aws-glue-alpha';
 import * as cdk from 'aws-cdk-lib';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as kds from 'aws-cdk-lib/aws-kinesis';
 import * as kinesisanalytics from 'aws-cdk-lib/aws-kinesisanalyticsv2';
 import { Construct } from 'constructs';
 
@@ -77,5 +78,25 @@ export class KdaStudio extends Construct {
         });
         new cdk.CfnOutput(this, 'KdaStudioApplicationName', {value: this.entity.applicationName!, description: 'The name of the KDA Studio application.'})
         new cdk.CfnOutput(this, 'KdaStudioApplicatioRef', {value: this.entity.ref, description: 'The ARN of the KDA Studio application.'})
+    }
+}
+
+
+interface BaseKinesisDataStreamPorps{
+    readonly streamName: string;
+}
+export class BaseKinesisDataStream extends Construct {
+    public readonly entity: kds.Stream;
+    constructor(scope: Construct, id: string, props?: BaseKinesisDataStreamPorps) {
+        super(scope, id);
+        const streamName: string = props?.streamName ?? 'input_stream';
+        if (!props?.streamName){
+            console.log('ℹ️ `streamName` as property for BaseKinesisDataStream is not specified, using default stream name: `input_stream`.')
+        }
+        this.entity = new kds.Stream(this, 'Stream', {
+            streamName: streamName,
+            streamMode: kds.StreamMode.ON_DEMAND
+        });
+        new cdk.CfnOutput(this, 'KinesisDataStreamArn', {value: this.entity.streamArn, description: 'The ARN of the Kinesis Data Stream.'});
     }
 }
