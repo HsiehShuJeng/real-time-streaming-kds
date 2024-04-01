@@ -3,6 +3,8 @@
 * [Run the program](#run-the-program)
 * [Notes](#notes)
     * [Amazon Kinese Data Streams](#amazon-kinesis-data-streams)
+    * [`PutRecord` API](#putrecord-api)
+    * [`PutRecourds` API](#putrecords-api)
 1. Create a Kinesis Data Stream (if one does not already exist).
 2. Learn about the concepts of writing to a Kinesis Data Stream using the Kinesis Data Streams API.
 3. Write Data to a Kinesis Data Stream.
@@ -116,7 +118,7 @@ Optimize our code for low latency writes to the Kinesis Data Stream.
 
 ## `PutRecord` API
 - The `PutRecord` API writes a single data record into an Amazon Kinesis data stream.
-- When using PutRecord, you must specify the stream name, partition key, and the data blob (in JSON format, base64-encoded).
+- When using `PutRecord`, you must specify the stream name, partition key, and the data blob (in JSON format, base64-encoded).
 - The total size of the data blob and partition key must not exceed the maximum record size (1 MiB).
 - Records cannot be modified or reordered after being written to the stream.
 
