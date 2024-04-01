@@ -63,7 +63,156 @@
     ```bash
     mvn clean compile package
     ```
+    The content of `POM.xml` when I was learning for reference:
+    ```xml
+    <!--
+    ~ Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+    ~
+    ~ Permission is hereby granted, free of charge, to any person obtaining a copy of
+    ~ this software and associated documentation files (the "Software"), to deal in
+    ~ the Software without restriction, including without limitation the rights to
+    ~ use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+    ~ the Software, and to permit persons to whom the Software is furnished to do so.
+    ~
+    ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    ~ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    ~ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    ~ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    ~ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    ~ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+    -->
+
+    <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.amazonaws.samples.kinesis.replay</groupId>
+    <artifactId>amazon-kinesis-replay</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>amazon-kinesis-replay</name>
+
+    <packaging>jar</packaging>
+
+    <properties>
+        <java.version>11</java.version>
+        <aws.java-sdk.version>2.25.21</aws.java-sdk.version>
+        <aws.kpl.version>0.15.10</aws.kpl.version>
+        <slf4j.version>2.0.12</slf4j.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+        <groupId>com.amazonaws</groupId>
+        <artifactId>amazon-kinesis-producer</artifactId>
+        <version>${aws.kpl.version}</version>
+        <exclusions>
+            <exclusion>
+            <!-- Exclude an old version of jackson-dataformat-cbor that is being pulled in by a transitive dependency -->
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-cbor</artifactId>
+            </exclusion>
+            <exclusion>
+            <!-- Exclude an old version of httpcomponents that is being pulled in by a transitive dependency -->
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            </exclusion>
+        </exclusions>
+        </dependency>
+
+        <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>kinesis</artifactId>
+        <version>${aws.java-sdk.version}</version>
+        </dependency>
+
+        <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>s3</artifactId>
+        <version>${aws.java-sdk.version}</version>
+        </dependency>
+
+        <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+        </dependency>
+
+        <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>${slf4j.version}</version>
+        </dependency>
+
+        <dependency>
+        <groupId>commons-cli</groupId>
+        <artifactId>commons-cli</artifactId>
+        <version>1.6.0</version>
+        </dependency>
+
+        <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-compress</artifactId>
+        <version>1.26.1</version>
+        </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-csv -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-csv</artifactId>
+            <version>2.17.0</version>
+        </dependency>
+
+        <dependency>
+        <groupId>org.json</groupId>
+        <artifactId>json</artifactId>
+        <version>20240303</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.7.0</version>
+            <configuration>
+            <source>${java.version}</source>
+            <target>${java.version}</target>
+            </configuration>
+        </plugin>
+
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>3.2.4</version>
+            <executions>
+            <execution>
+                <phase>package</phase>
+                <goals>
+                <goal>shade</goal>
+                </goals>
+                <configuration>
+                <createDependencyReducedPom>false</createDependencyReducedPom>
+                <transformers>
+                    <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                    <mainClass>C_AsyncProducer</mainClass>
+                    </transformer>
+                </transformers>
+                </configuration>
+            </execution>
+            </executions>
+        </plugin>
+        </plugins>
+    </build>
+
+    </project>
+    ```
 3. Execute the program
     ```java
     java -cp target/amazon-kinesis-replay-1.0-SNAPSHOT.jar A_SimpleProducer
     ```
+
+![KPL with success](../images/[Lab%201]%20KPL%20with%20success.png)
