@@ -4,6 +4,22 @@ This is a blank project for CDK development with TypeScript.
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
+## Learning Objectives
+<details>
+<summary>Produce data to Kinesis Data Streams</summary>
+
+![](images/Lab%20Architecture%201.png)  
+* [Amazon SDK](docs/using-amazon-sdk-with-kinesis.md)
+* [Kinesis Producer Library](docs/using-kinesis-producer-library.md)
+
+</details>
+
+<details>
+<summary>Write data to a Kinesis Data Stream using Amazon Managed Service for Apache Flink Studio Notebook</summary>
+
+
+</details>
+
 ## Useful commands
 
 * `npm run build`   compile typescript to js
