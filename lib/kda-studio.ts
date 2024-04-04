@@ -3,6 +3,8 @@ import * as cdk from 'aws-cdk-lib';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as kds from 'aws-cdk-lib/aws-kinesis';
 import * as kinesisanalytics from 'aws-cdk-lib/aws-kinesisanalyticsv2';
+import * as kfh from 'aws-cdk-lib/aws-kinesisfirehose';
+import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
 interface KdaStudioProps {
@@ -98,5 +100,32 @@ export class BaseKinesisDataStream extends Construct {
             streamMode: kds.StreamMode.ON_DEMAND
         });
         new cdk.CfnOutput(this, 'KinesisDataStreamArn', {value: this.entity.streamArn, description: 'The ARN of the Kinesis Data Stream.'});
+    }
+}
+
+interface Lab3KinesisFirehoseProps {
+    sourceKinesisStream: kds.IStream;
+    destinationBucket: s3.IBucket;
+    deliveryStreamName?: string,
+}
+export class Lab3KinesisFirehose extends Construct {
+    public readonly entity: kfh.CfnDeliveryStream;
+    constructor(scope: Construct, id: string, props: Lab3KinesisFirehoseProps) {
+        super(scope, id);
+        const deliveryStreamName = props.deliveryStreamName ?? 'nyc-taxi-trips';
+        if (!props.deliveryStreamName){
+            console.log('ℹ️ `deliveryStreamName` as property for Lab3KinesisFirehose is not specified, using default delivery stream name: `nyc-taxi-trips`.')
+        }
+        // Enter a unique name for the Delivery stream name, eg, nyc-taxi-trips. Select data transformation Enabled. Select NYCTaxiTrips-DataTransformation Lambda. The Lambda will add new column called source in the incoming data and populate with NYCTAXI value.
+        this.entity = new kfh.CfnDeliveryStream(this, 'DeliveryStream', {
+            deliveryStreamName: deliveryStreamName,
+            kinesisStreamSourceConfiguration: {
+                kinesisStreamArn: props.sourceKinesisStream.streamArn,
+            },
+            s3DestinationConfiguration: {
+                bucketArn: props.destinationBucket.bucketArn,
+            }
+
+        })
     }
 }
