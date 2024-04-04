@@ -1,3 +1,4 @@
+![Architecture 2](../images/Lab%20Architecture%202.png)
 1. Upload data file into the S3 bucket.
     ```bash
     # As of me, my bucket name is curateddata-630778274080-ap-southeast-1-c424f300, yours will be different to this. Mind the information after the CDK deployment.  
