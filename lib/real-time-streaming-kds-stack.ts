@@ -8,9 +8,17 @@ import { DataTransformer, KdsStartLambdaFunction } from './lambda-functions';
 import { GlueDatabase } from './metadata';
 import { OpenSearch } from './search-engine';
 
+interface RealTimeStreamingKdsStackProps extends cdk.StackProps {
+  readonly createKdsStreamOrNot?: boolean;
+}
+
 export class RealTimeStreamingKdsStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: RealTimeStreamingKdsStackProps) {
     super(scope, id, props);
+    const createKdsStreamOrNot = props?.createKdsStreamOrNot ?? true;
+    if (!props?.createKdsStreamOrNot){
+      console.log('ℹ️ `createKdsStreamOrNot` as stack property for RealTimeStreamingKdsStack is not specified, using default value, i.e., true.')
+    }
     const requiredBuckets = new Buckets(this, 'Demo')
     const glueDatabase = new GlueDatabase(this, 'Glue');
     const eeAssetsBucketName = 'ee-assets-prod-us-east-1';
@@ -25,7 +33,9 @@ export class RealTimeStreamingKdsStack extends cdk.Stack {
     new DataTransformer(this, 'DataTransformer', {
       baseRole: kdsConsumerRole.entity
     });
-    new BaseKinesisDataStream(this, 'Beginner');
+    if (createKdsStreamOrNot){
+      new BaseKinesisDataStream(this, 'Beginner');
+    }
     const kdsStudio = new KdaStudio(this, 'KdaStudio', {
       glueDatabase: glueDatabase.entity,
       serviceRole: kineseAnalyticsRole.entity,
