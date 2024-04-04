@@ -5,19 +5,24 @@ import { Cloud9Instance } from './cloud9';
 import { KdsConsumerRole, KinesisAnalyticsRole, StartKdaLambdaRole } from './iam-entities';
 import { BaseKinesisDataStream, KdaStudio } from './kda-studio';
 import { DataTransformer, KdsStartLambdaFunction } from './lambda-functions';
-import { GlueDatabase } from './metadata';
+import { GlueDatabase, Lab3Table } from './metadata';
 import { OpenSearch } from './search-engine';
 
 interface RealTimeStreamingKdsStackProps extends cdk.StackProps {
   readonly createKdsStreamOrNot?: boolean;
+  readonly createLab3TableOrNot?: boolean;
 }
 
 export class RealTimeStreamingKdsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: RealTimeStreamingKdsStackProps) {
     super(scope, id, props);
     const createKdsStreamOrNot = props?.createKdsStreamOrNot ?? true;
+    const createLab3TableOrNot = props?.createLab3TableOrNot ?? true;
     if (!props?.createKdsStreamOrNot){
       console.log('ℹ️ `createKdsStreamOrNot` as stack property for RealTimeStreamingKdsStack is not specified, using default value, i.e., true.')
+    }
+    if (!props?.createLab3TableOrNot){
+      console.log('ℹ️ `createLab3TableOrNot` as stack property for RealTimeStreamingKdsStack is not specified, using default value, i.e., true.')
     }
     const requiredBuckets = new Buckets(this, 'Demo')
     const glueDatabase = new GlueDatabase(this, 'Glue');
@@ -52,5 +57,11 @@ export class RealTimeStreamingKdsStack extends cdk.Stack {
     })
     kdsStartLambda.node.addDependency(kdsStudio);
     new OpenSearch(this, 'OpenSearch')
+    if (createLab3TableOrNot){
+      new Lab3Table(this, 'Lab3', {
+        database: glueDatabase.entity,
+        bucket: requiredBuckets.taxiTripDataSet
+      })
+    }
   }
 }
