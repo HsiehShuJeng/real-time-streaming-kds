@@ -3,7 +3,7 @@ import { Construct } from 'constructs';
 import { Buckets } from './buckets';
 import { Cloud9Instance } from './cloud9';
 import { KdsConsumerRole, KinesisAnalyticsRole, StartKdaLambdaRole } from './iam-entities';
-import { BaseKinesisDataStream, KdaStudio } from './kda-studio';
+import { BaseKinesisDataStream, KdaStudio, Lab3KinesisFirehose } from './kda-studio';
 import { DataTransformer, KdsStartLambdaFunction } from './lambda-functions';
 import { GlueDatabase, Lab3Table } from './metadata';
 import { OpenSearch } from './search-engine';
@@ -18,6 +18,7 @@ export class RealTimeStreamingKdsStack extends cdk.Stack {
     super(scope, id, props);
     const createKdsStreamOrNot = props?.createKdsStreamOrNot ?? true;
     const createLab3TableOrNot = props?.createLab3TableOrNot ?? true;
+    let baseStream: BaseKinesisDataStream;
     if (!props?.createKdsStreamOrNot){
       console.log('ℹ️ `createKdsStreamOrNot` as stack property for RealTimeStreamingKdsStack is not specified, using default value, i.e., true.')
     }
@@ -35,11 +36,11 @@ export class RealTimeStreamingKdsStack extends cdk.Stack {
       eeAssetsBucketName: eeAssetsBucketName
     });
     const kdsConsumerRole = new KdsConsumerRole(this, 'KdsConsumer')
-    new DataTransformer(this, 'DataTransformer', {
+    const dataTransformer = new DataTransformer(this, 'DataTransformer', {
       baseRole: kdsConsumerRole.entity
     });
     if (createKdsStreamOrNot){
-      new BaseKinesisDataStream(this, 'Beginner');
+      baseStream = new BaseKinesisDataStream(this, 'Beginner');
     }
     const kdsStudio = new KdaStudio(this, 'KdaStudio', {
       glueDatabase: glueDatabase.entity,
@@ -58,9 +59,15 @@ export class RealTimeStreamingKdsStack extends cdk.Stack {
     kdsStartLambda.node.addDependency(kdsStudio);
     new OpenSearch(this, 'OpenSearch')
     if (createLab3TableOrNot){
-      new Lab3Table(this, 'Lab3', {
+      const lab3Table = new Lab3Table(this, 'Lab3', {
         database: glueDatabase.entity,
         bucket: requiredBuckets.taxiTripDataSet
+      })
+      new Lab3KinesisFirehose(this, 'Lab3KinesisFirehose', {
+        sourceKinesisStream: baseStream!.entity,
+        destinationBucket: requiredBuckets.taxiTripDataSet,
+        glueTable: lab3Table.entity,
+        transformingFunction: dataTransformer.entity,
       })
     }
   }
