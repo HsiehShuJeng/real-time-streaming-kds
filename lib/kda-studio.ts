@@ -131,7 +131,7 @@ export class Lab3KinesisFirehose extends Construct {
         if (!props.deliveryStreamName){
             console.log('ℹ️ `deliveryStreamName` as property for Lab3KinesisFirehose is not specified, using default delivery stream name: `nyc-taxi-trips`.')
         }
-        const timestamp = new Date().getTime();
+        const timestamp = '1712475985359';
         const randomInfix = '0lKoC';
         const defaultDeliveryStreamRole = new iam.Role(this, 'Role', {
             assumedBy: new iam.ServicePrincipal('firehose.amazonaws.com'),
