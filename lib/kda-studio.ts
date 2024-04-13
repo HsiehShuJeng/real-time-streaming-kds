@@ -351,5 +351,6 @@ export class Lab3KinesisFirehose extends Construct {
 
         new cdk.CfnOutput(this, 'DeliveryStreamArn', {value: this.entity.attrArn, description: 'The ARN of the Firehose delivery stream.'});
         new cdk.CfnOutput(this, 'DataFirehoseStreamMonitoring', {value: `https://${cdk.Aws.REGION}.console.aws.amazon.com/firehose/home?region=${cdk.Aws.REGION}#/details/${deliveryStreamName}/monitoring`, description: 'The URL of the monitoring page for the Firehose delivery stream.'});
+        new cdk.CfnOutput(this, 'TransformationFunctionUrl', {value: `https://${cdk.Aws.REGION}.console.aws.amazon.com/lambda/home?region=${cdk.Aws.REGION}#/functions/${props.transformingFunction.functionName}?tab=code`, description: 'The URL of the transformation function on AWS.'});
     }
 }
