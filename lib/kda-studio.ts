@@ -133,6 +133,7 @@ export class Lab3KinesisFirehose extends Construct {
         }
         const timestamp = '1712475985359';
         const randomInfix = '0lKoC';
+        const logGroupName = `/aws/kinesisfirehose/KDS-S3-${randomInfix}`;
         const defaultDeliveryStreamRole = new iam.Role(this, 'Role', {
             assumedBy: new iam.ServicePrincipal('firehose.amazonaws.com'),
             roleName: `KinesisFirehoseServiceRole-KDS-S3-0-${cdk.Aws.REGION}-${timestamp}`,
@@ -189,6 +190,22 @@ export class Lab3KinesisFirehose extends Construct {
                         new iam.PolicyStatement({
                             effect: iam.Effect.ALLOW,
                             actions: [
+                                's3:AbortMultipartUpload',
+                                's3:GetBucketLocation',
+                                's3:GetObject',
+                                's3:ListBucket',
+                                's3:ListBucketMultipartUploads',
+                                's3:PutObject',
+                                's3:PutObjectAcl'
+                            ],
+                            resources: [
+                                props.destinationBucket.bucketArn,
+                                `${props.destinationBucket.bucketArn}/*`
+                            ]
+                        }),
+                        new iam.PolicyStatement({
+                            effect: iam.Effect.ALLOW,
+                            actions: [
                                 'lambda:InvokeFunction',
                                 'lambda:GetFunctionConfiguration'
                             ],
@@ -223,7 +240,7 @@ export class Lab3KinesisFirehose extends Construct {
                                 'logs:PutLogEvents'
                             ],
                             resources: [
-                                `arn:aws:logs:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:log-group:/aws/kinesisfirehose/KDS-S3-${randomInfix}:log-stream:*`,
+                                `arn:aws:logs:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:log-group:${logGroupName}:log-stream:*`,
                                 `arn:aws:logs:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:log-group:%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%:log-stream:*`
                             ]
                         }),
@@ -281,6 +298,10 @@ export class Lab3KinesisFirehose extends Construct {
                 bufferingHints: {
                     sizeInMBs: 128,
                     intervalInSeconds: 60
+                },
+                cloudWatchLoggingOptions: {
+                    enabled: true,
+                    logGroupName: logGroupName
                 },
                 customTimeZone: 'Asia/Taipei',
                 prefix: 'nyctaxitrips/year=!{timestamp:YYYY}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/',
