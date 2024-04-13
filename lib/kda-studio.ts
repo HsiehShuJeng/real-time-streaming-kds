@@ -127,12 +127,16 @@ export class Lab3KinesisFirehose extends Construct {
     public readonly entity: kfh.CfnDeliveryStream;
     constructor(scope: Construct, id: string, props: Lab3KinesisFirehoseProps) {
         super(scope, id);
+        const timestamp = '1712475985359';
+        const randomInfix = '0lKoC';
         const deliveryStreamName = props.deliveryStreamName ?? 'nyc-taxi-trips';
+        const dataFirehoseIamRoleName = props.dataFirehoseIamRoleName ?? `KinesisFirehoseServiceRole-KDS-S3-0-${cdk.Aws.REGION}-${timestamp}`;
         if (!props.deliveryStreamName){
             console.log('ℹ️ `deliveryStreamName` as property for Lab3KinesisFirehose is not specified, using default delivery stream name: `nyc-taxi-trips`.')
         }
-        const timestamp = '1712475985359';
-        const randomInfix = '0lKoC';
+        if (!props.dataFirehoseIamRoleName){
+            console.log(`ℹ️ \`dataFirehoseIamRoleName\` as property for Lab3KinesisFirehose is not specified, using default role name: ${dataFirehoseIamRoleName}.`)
+        }
         const logGroupName = `/aws/kinesisfirehose/KDS-S3-${randomInfix}`;
         const defaultDeliveryStreamRole = new iam.Role(this, 'Role', {
             assumedBy: new iam.ServicePrincipal('firehose.amazonaws.com'),
@@ -301,7 +305,8 @@ export class Lab3KinesisFirehose extends Construct {
                 },
                 cloudWatchLoggingOptions: {
                     enabled: true,
-                    logGroupName: logGroupName
+                    logGroupName: logGroupName,
+                    logStreamName: 'lab3LogStream'
                 },
                 customTimeZone: 'Asia/Taipei',
                 prefix: 'nyctaxitrips/year=!{timestamp:YYYY}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/',
@@ -344,6 +349,7 @@ export class Lab3KinesisFirehose extends Construct {
             }
         })
 
-        new cdk.CfnOutput(this, 'DeliveryStreamArn', {value: this.entity.attrArn, exportName: 'DeliveryStreamArn'})
+        new cdk.CfnOutput(this, 'DeliveryStreamArn', {value: this.entity.attrArn, description: 'The ARN of the Firehose delivery stream.'});
+        new cdk.CfnOutput(this, 'DataFirehoseStreamMonitoring', {value: `https://${cdk.Aws.REGION}.console.aws.amazon.com/firehose/home?region=${cdk.Aws.REGION}#/details/${deliveryStreamName}/monitoring`, description: 'The URL of the monitoring page for the Firehose delivery stream.'});
     }
 }
