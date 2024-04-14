@@ -17,6 +17,13 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 <details>
 <summary>Write data to a Kinesis Data Stream using Amazon Managed Service for Apache Flink Studio Notebook</summary>
 
+</details>
+
+<details>
+<summary>Lambda with Amazon Data Firehose</summary>
+
+![Lab Architecture 3](images/Lab%20Architecture%203.png)
+* [Detail for Lab 3](docs/lambda-with-amazon-kfh.md)
 
 </details>
 

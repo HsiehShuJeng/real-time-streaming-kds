@@ -1,3 +1,4 @@
+![Lab Architecture 3](../images/Lab%20Architecture%203.png)
 # Prerequisites
 1. Create a Glue Table for this lab.  
     The construct `Lab3Table` in [metadata.ts](../lib/metadata.ts) will create the table for you.  
