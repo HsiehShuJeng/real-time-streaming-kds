@@ -1,0 +1,2 @@
+protobuf==3.19.0
+aws_kinesis_agg==1.1.7

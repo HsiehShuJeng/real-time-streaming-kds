@@ -1,3 +1,4 @@
+import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
 import * as cdk from 'aws-cdk-lib';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
@@ -87,5 +88,27 @@ export class KdsStartLambdaFunction extends Construct {
                 ApplicationName: props.applicationName
             }
         })
+    }
+}
+
+interface KdsConsumerFunctionProps {
+    ddbTableName: string;
+}
+
+export class KdsConsumerFunction extends Construct {
+    public readonly entity: lambda.Function;
+    constructor(scope: Construct, id: string, props: KdsConsumerFunctionProps) {
+        super(scope, id);
+        this.entity = new PythonFunction(this, 'Lambda', {
+            entry: path.join(__dirname, '../resources/consumer'),
+            index: 'kds-consumer.py',
+            architecture: lambda.Architecture.ARM_64,
+            runtime: lambda.Runtime.PYTHON_3_12,
+            handler: 'lambda_handler',
+            environment: {
+              dynamoDBTableName: props.ddbTableName
+            }
+          });
+        new cdk.CfnOutput(this, 'KdsConsumerFunctionArn', {value: this.entity.functionArn, description: 'The ARN of the KDS consumer as a Lambda function.'})
     }
 }

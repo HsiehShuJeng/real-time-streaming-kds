@@ -2,15 +2,17 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { Buckets } from './buckets';
 import { Cloud9Instance } from './cloud9';
+import { DdbTable } from './ddb';
 import { KdsConsumerRole, KinesisAnalyticsRole, StartKdaLambdaRole } from './iam-entities';
 import { BaseKinesisDataStream, KdaStudio, Lab3KinesisFirehose } from './kda-studio';
-import { DataTransformer, KdsStartLambdaFunction } from './lambda-functions';
+import { DataTransformer, KdsConsumerFunction, KdsStartLambdaFunction } from './lambda-functions';
 import { GlueDatabase, Lab3Table } from './metadata';
 import { OpenSearch } from './search-engine';
 
 interface RealTimeStreamingKdsStackProps extends cdk.StackProps {
   readonly createKdsStreamOrNot?: boolean;
   readonly createLab3TableOrNot?: boolean;
+  readonly createLab5ResourcesOrNot?: boolean;
 }
 
 export class RealTimeStreamingKdsStack extends cdk.Stack {
@@ -18,6 +20,7 @@ export class RealTimeStreamingKdsStack extends cdk.Stack {
     super(scope, id, props);
     const createKdsStreamOrNot = props?.createKdsStreamOrNot ?? true;
     const createLab3TableOrNot = props?.createLab3TableOrNot ?? true;
+    const createLab5ResourcesOrNot = props?.createLab5ResourcesOrNot ?? true;
     let baseStream: BaseKinesisDataStream;
     if (!props?.createKdsStreamOrNot){
       console.log('ℹ️ `createKdsStreamOrNot` as stack property for RealTimeStreamingKdsStack is not specified, using default value, i.e., true.')
@@ -68,6 +71,12 @@ export class RealTimeStreamingKdsStack extends cdk.Stack {
         destinationBucket: requiredBuckets.taxiTripDataSet,
         glueTable: lab3Table.entity,
         transformingFunction: dataTransformer.entity,
+      })
+    }
+    if (createLab5ResourcesOrNot){
+      const lab5DdbTable = new DdbTable(this, 'Lab5')
+      new KdsConsumerFunction(this, 'Lab5KdsConsumer', {
+        ddbTableName: lab5DdbTable.entity.tableName
       })
     }
   }

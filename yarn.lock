@@ -30,6 +30,11 @@
   resolved "https://registry.yarnpkg.com/@aws-cdk/aws-glue-alpha/-/aws-glue-alpha-2.133.0-alpha.0.tgz#bf7755e129385af9c00be848d76eb85ec1914221"
   integrity sha512-bs0L3oBWhX97Avpyvq6h7/MxKOA76afGPaH/1Sfd5vJXEh8nvMICKERShp+bRSkwu0yYBc/HPiEQyo8vWXjP5w==
 
+"@aws-cdk/aws-lambda-python-alpha@^2.138.0-alpha.0":
+  version "2.138.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/aws-lambda-python-alpha/-/aws-lambda-python-alpha-2.138.0-alpha.0.tgz#24832ce4cdd97efe69eb6554194102d1e86c3e61"
+  integrity sha512-9Y4bRr69egVsgoANG0e5531nO0l5gbZjNOK7QtsYy5o+02pZy642ia0tTKGpHB3QzOoLUsulx9CplCS137w52Q==
+
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.12.13", "@babel/code-frame@^7.23.5", "@babel/code-frame@^7.24.1", "@babel/code-frame@^7.24.2":
   version "7.24.2"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.24.2.tgz#718b4b19841809a58b29b68cde80bc5e1aa6d9ae"
