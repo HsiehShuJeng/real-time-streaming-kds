@@ -93,6 +93,7 @@ export class KdsStartLambdaFunction extends Construct {
 
 interface KdsConsumerFunctionProps {
     ddbTableName: string;
+    consumerRole: iam.IRole;
 }
 
 export class KdsConsumerFunction extends Construct {
@@ -100,6 +101,7 @@ export class KdsConsumerFunction extends Construct {
     constructor(scope: Construct, id: string, props: KdsConsumerFunctionProps) {
         super(scope, id);
         this.entity = new PythonFunction(this, 'Lambda', {
+            role: props.consumerRole,
             entry: path.join(__dirname, '../resources/consumer'),
             index: 'kds-consumer.py',
             architecture: lambda.Architecture.ARM_64,
@@ -107,7 +109,10 @@ export class KdsConsumerFunction extends Construct {
             handler: 'lambda_handler',
             environment: {
               dynamoDBTableName: props.ddbTableName
-            }
+            },
+            memorySize: 1024,
+            ephemeralStorageSize: cdk.Size.mebibytes(512),
+            timeout: cdk.Duration.minutes(1)
           });
         new cdk.CfnOutput(this, 'KdsConsumerFunctionArn', {value: this.entity.functionArn, description: 'The ARN of the KDS consumer as a Lambda function.'})
     }

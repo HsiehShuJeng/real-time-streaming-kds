@@ -21,6 +21,7 @@ export class RealTimeStreamingKdsStack extends cdk.Stack {
     const createKdsStreamOrNot = props?.createKdsStreamOrNot ?? true;
     const createLab3TableOrNot = props?.createLab3TableOrNot ?? true;
     const createLab5ResourcesOrNot = props?.createLab5ResourcesOrNot ?? true;
+    const ddbTableName = 'kinesisAggs';
     let baseStream: BaseKinesisDataStream;
     if (!props?.createKdsStreamOrNot){
       console.log('ℹ️ `createKdsStreamOrNot` as stack property for RealTimeStreamingKdsStack is not specified, using default value, i.e., true.')
@@ -38,7 +39,7 @@ export class RealTimeStreamingKdsStack extends cdk.Stack {
       curatedDataSetBucket: requiredBuckets.curatedDataSet,
       eeAssetsBucketName: eeAssetsBucketName
     });
-    const kdsConsumerRole = new KdsConsumerRole(this, 'KdsConsumer')
+    const kdsConsumerRole = new KdsConsumerRole(this, 'KdsConsumer', {ddbTableName: ddbTableName})
     const dataTransformer = new DataTransformer(this, 'DataTransformer', {
       baseRole: kdsConsumerRole.entity
     });
@@ -74,9 +75,12 @@ export class RealTimeStreamingKdsStack extends cdk.Stack {
       })
     }
     if (createLab5ResourcesOrNot){
-      const lab5DdbTable = new DdbTable(this, 'Lab5')
+      new DdbTable(this, 'Lab5', {
+        ddbTableName: ddbTableName
+      })
       new KdsConsumerFunction(this, 'Lab5KdsConsumer', {
-        ddbTableName: lab5DdbTable.entity.tableName
+        ddbTableName: ddbTableName,
+        consumerRole: kdsConsumerRole.entity
       })
     }
   }

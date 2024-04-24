@@ -147,6 +147,10 @@ export class KinesisAnalyticsRole extends Construct {
         new cdk.CfnOutput(this, 'KinesisAnalyticsRoleArn', {value: this.entity.roleArn, description: 'The ARN of the KDA role.'})
 }}
 
+interface KdsConsumerRoleProps {
+    ddbTableName: string;
+}
+
 /**
  * KdsConsumerRole
  *
@@ -178,7 +182,7 @@ export class KinesisAnalyticsRole extends Construct {
  */
 export class KdsConsumerRole extends Construct {
     public readonly entity: iam.Role;
-    constructor(scope: Construct, id: string) {
+    constructor(scope: Construct, id: string, props: KdsConsumerRoleProps) {
         super(scope, id);
         this.entity = new iam.Role(this, 'KdsConsumerRole', {
             roleName: `KinesisLambdaConsumerRole-${cdk.Aws.STACK_NAME}`,
@@ -220,7 +224,7 @@ export class KdsConsumerRole extends Construct {
                                 'dynamodb:UpdateTable'
                             ],
                             resources: [
-                                `arn:aws:dynamodb:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:table/kinesisAggs`
+                                `arn:aws:dynamodb:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:table/${props.ddbTableName}`
                             ]
                         }),
                         new iam.PolicyStatement({
