@@ -1,11 +1,14 @@
 import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
 import * as cdk from 'aws-cdk-lib';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as kinesis from 'aws-cdk-lib/aws-kinesis';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as eventsources from 'aws-cdk-lib/aws-lambda-event-sources';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as cr from 'aws-cdk-lib/custom-resources';
 import { Construct } from "constructs";
 import * as path from 'path';
+
 
 interface DataTransformerProp {
     baseRole: iam.Role;
@@ -94,6 +97,7 @@ export class KdsStartLambdaFunction extends Construct {
 interface KdsConsumerFunctionProps {
     ddbTableName: string;
     consumerRole: iam.IRole;
+    triggeredStream: kinesis.IStream;
 }
 
 export class KdsConsumerFunction extends Construct {
@@ -114,6 +118,14 @@ export class KdsConsumerFunction extends Construct {
             ephemeralStorageSize: cdk.Size.mebibytes(512),
             timeout: cdk.Duration.minutes(1)
           });
+        this.entity.addEventSource(new eventsources.KinesisEventSource(props.triggeredStream, {
+            batchSize: 1000,
+            maxBatchingWindow: cdk.Duration.seconds(120),
+            startingPosition: lambda.StartingPosition.LATEST,
+            retryAttempts: 2,
+            parallelizationFactor: 1,
+            tumblingWindow: cdk.Duration.minutes(5)
+        }))
         new cdk.CfnOutput(this, 'KdsConsumerFunctionArn', {value: this.entity.functionArn, description: 'The ARN of the KDS consumer as a Lambda function.'})
     }
 }
