@@ -80,7 +80,8 @@ export class RealTimeStreamingKdsStack extends cdk.Stack {
       })
       new KdsConsumerFunction(this, 'Lab5KdsConsumer', {
         ddbTableName: ddbTableName,
-        consumerRole: kdsConsumerRole.entity
+        consumerRole: kdsConsumerRole.entity,
+        triggeredStream: baseStream!.entity
       })
     }
   }
