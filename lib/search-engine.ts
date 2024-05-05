@@ -5,10 +5,20 @@ import * as opensearch from 'aws-cdk-lib/aws-opensearchservice';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 
+/**
+ * Represents the properties for configuring an Amazon OpenSearch Service domain.
+ */
 interface OpenSearchProps {
+    /**
+     * The name of the OpenSearch domain.
+     * @default 'os-domain'
+     */
     domainName?: string
 }
 
+/**
+ * A construct that creates an Amazon OpenSearch Service domain.
+ */
 export class OpenSearch extends Construct {
     public readonly entity: opensearch.Domain;
     constructor(scope: Construct, id: string, props?: OpenSearchProps){
