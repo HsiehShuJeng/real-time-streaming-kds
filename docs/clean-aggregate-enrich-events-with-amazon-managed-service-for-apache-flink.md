@@ -1,3 +1,5 @@
+![Architecture 4](../images/Lab%20Architecture%204.png)
+
 # Steps
 1. Setup managed Apache Flink Notebook
     The construct, `KdaStudio`, in [kda-studio.ts](../lib/kda-studio.ts) will create a Studio notebook for you.  
