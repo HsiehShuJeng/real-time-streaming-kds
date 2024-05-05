@@ -1,3 +1,4 @@
+![Architecture 6](../images/Lab%20Architecture%206.png)
 # Steps
 1. Download the sample consumer.
     ```bash
