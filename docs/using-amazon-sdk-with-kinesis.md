@@ -1,3 +1,4 @@
+![Architecture 1](../images/Lab%20Architecture%201.png)
 # Make content table
 * [Working with the SDK](#working-with-the-sdk)
 * [Run the program](#run-the-program)
