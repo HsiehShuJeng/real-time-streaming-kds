@@ -59,11 +59,23 @@ export class DataTransformer extends Construct {
     }
 }
 
+/**
+ * Represents the properties for configuring the KDS Start Lambda Function.
+ */
 interface KdsStartLambdaFunctionProps {
+    /**
+     * The base IAM role for the Lambda function.
+     */
     baseRole: iam.Role;
+    /**
+     * The name of the Kinesis Data Analytics (KDA) application to start.
+     */
     applicationName: string;
 }
 
+/**
+ * A construct that creates a Lambda function to start a Kinesis Data Analytics (KDA) application.
+ */
 export class KdsStartLambdaFunction extends Construct {
     public readonly entity: lambda.Function;
     constructor(scope: Construct, id: string, props: KdsStartLambdaFunctionProps) {
@@ -94,12 +106,27 @@ export class KdsStartLambdaFunction extends Construct {
     }
 }
 
+/**
+ * Represents the properties for configuring the KDS Consumer Lambda Function.
+ */
 interface KdsConsumerFunctionProps {
+    /**
+     * The name of the DynamoDB table to use.
+     */
     ddbTableName: string;
+    /**
+     * The IAM role for the consumer Lambda function.
+     */
     consumerRole: iam.IRole;
+    /**
+     * The Kinesis stream that triggers the consumer Lambda function.
+     */
     triggeredStream: kinesis.IStream;
 }
 
+/**
+ * A construct that creates a Lambda function to consume data from a Kinesis Data Stream.
+ */
 export class KdsConsumerFunction extends Construct {
     public readonly entity: lambda.Function;
     constructor(scope: Construct, id: string, props: KdsConsumerFunctionProps) {
