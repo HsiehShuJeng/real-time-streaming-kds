@@ -6,7 +6,6 @@ describe("Tests the creation of the DynamoDB table", () => {
     const stack = new cdk.Stack(app, 'TestStack');
     new DdbTable(stack, 'DynamoDB');
     const template = Template.fromStack(stack);
-    // console.log(JSON.stringify(template, null, 2))
     test('Checks the number of the DDB table', ()=>{
         const ddbTableResources = template.findResources('AWS::DynamoDB::Table');
         let ddbTableNumber = 0;
