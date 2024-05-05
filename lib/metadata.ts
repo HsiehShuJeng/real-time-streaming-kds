@@ -3,10 +3,20 @@ import * as cdk from 'aws-cdk-lib';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
+/**
+ * Represents the properties for configuring an AWS Glue database.
+ */
 interface GlueDatabaseProps {
+    /**
+     * The name of the Glue database.
+     * @default 'kinesislab'
+     */
     readonly kdaDatabaseName?: string;
 }
 
+/**
+ * A construct that creates an AWS Glue database.
+ */
 export class GlueDatabase extends Construct {
     public readonly entity: glue.Database;
     constructor(scope: Construct, id: string, props?: GlueDatabaseProps) {
@@ -20,12 +30,28 @@ export class GlueDatabase extends Construct {
     }
 }
 
+/**
+ * Represents the properties for configuring an AWS Glue S3 table.
+ */
 interface Lab3TableProps {
+    /**
+     * The AWS Glue database where the table will be created.
+     */
     readonly database: glue.IDatabase;
+    /**
+     * The S3 bucket where the table data is stored.
+     */
     readonly bucket: s3.IBucket;
+    /**
+     * The name of the Glue table.
+     * @default 'nyctaxitrips'
+     */
     readonly tableName?: string;
 }
 
+/**
+ * A construct that creates an AWS Glue S3 table.
+ */
 export class Lab3Table extends Construct {
     public readonly entity: glue.S3Table;
     constructor(scope: Construct, id: string, props: Lab3TableProps) {
